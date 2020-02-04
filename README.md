@@ -241,7 +241,7 @@ research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh client.sh --switch-power
 
 ### DEMO 4: Dumping S7 PLC RAM
 
-To dump the PLC memory, we would recommend to first turn on the PLC for few seconds, to let the PLC copy contents of the NAND flash to the RAM (alternatively you can wait as long as you want!). We specially designed --powersupply-delay argument in our utility for this purpose. We use dump mode in our utility followed by -a argument which user supplies address to dump and -l argument for the byte size. 
+To dump the PLC memory, we would recommend to first turn on the PLC for few seconds, to let the PLC copy contents of the NAND flash to the RAM (alternatively you can wait as long as you want!). We specially designed `--powersupply-delay` argument in our utility for this purpose. We use dump mode in our utility followed by `-a` argument which user supplies address to dump and `-l` argument for the byte size. 
 
 Similar to other demos we need to first compile our payload:
 
@@ -266,7 +266,7 @@ Now we are ready to dump the PLC. Here we put power supply delay argument to 30 
 research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh client_bricked.sh --switch-power --powersupply-delay=30 dump -a 0x691E28 -l 256
 ```
 
-In this example, we dump 256 bytes starting from offset `0x691E28` of the PLC memory. Once utility dump the memory, it place it in `uart_rce/` folder with the prefix name mem_dump_ plus start and end range address (mem_dump_00691e28_00691f28). 
+In this example, we dump 256 bytes starting from offset `0x691E28` of the PLC memory. Once utility dump the memory, it place it in `uart_rce/` folder with the prefix `mem_dump_` plus start and end range address (mem_dump_00691e28_00691f28). 
 
 
 
