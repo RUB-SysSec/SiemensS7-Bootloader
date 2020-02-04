@@ -154,7 +154,7 @@ One can use any TTL 3.3V device. Obviously you should connect TX pin of the TTL 
 Once you copied our repo go to uart_rce folder and get the name of TTYUSB Adapter in /dev. Generally it will be /dev/TTYUSB0 (This name is hardcoded in start.sh). You also need to install required python and `arm-none-eabi` compiler to compile payload for the PLC. Additionally, you must set the IP address of `ALLNET ALL3075V3` to `192.168.0.100` (you can change this value inside client.sh script). 
 
 
-To actually compile the payload go to `uart_rce/payloads` folder. There are various payloads available. Each payload have a [build.sh](uart_rce/payloads/hello_world/build.sh) file. To compile them you can go inside the folder and run the build bash file. For example, here we compile the hello_world payload which is used for our test mode :
+To actually compile the payload go to `uart_rce/payloads` folder. There are various payloads available. Each payload have a [build.sh](https://github.com/RUB-SysSec/SiemensS7-Bootloader/blob/master/payloads/hello_world/build.sh) file. To compile them you can go inside the folder and run the build bash file. For example, here we compile the hello_world payload which is used for our test mode :
 
 
 ```console
