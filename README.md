@@ -298,6 +298,6 @@ We presented our research at multiple venues. Here is the list of them:
 
  * [A Deep Dive Into Unconstrained Code Execution on Siemens S7 PLCs](https://media.ccc.de/v/36c3-10709-a_deep_dive_into_unconstrained_code_execution_on_siemens_s7_plcs), Ali Abbasi, Tobias Scharnowski, Chaos Communication Congress (36C3), December 2019, Leipzig, Germany.
 
- * [Doors of Durin: The Veiled Gate to Siemens S7 Silicon](https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf), Ali Abbasi, Tobias Scharnowski, Thorsten Holz, Black Hat Europe, December 2019, London, United Kingdom (Presentation Available).
+ * [Doors of Durin: The Veiled Gate to Siemens S7 Silicon](https://i.blackhat.com/eu-19/Wednesday/eu-19-Abbasi-Doors-Of-Durin-The-Veiled-Gate-To-Siemens-S7-Silicon.pdf), Ali Abbasi, Tobias Scharnowski, Thorsten Holz, Black Hat Europe, December 2019, London, United Kingdom.
 
 
